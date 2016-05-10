@@ -1,0 +1,3 @@
+Weapons:
+-Blaster: mini rockets -- speed 800 damage 25 +- 5 no splash
+-hblaster: mini rockets -- speed 750 damage 15+- 5 splash damage 20 radius 35
