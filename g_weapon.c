@@ -758,7 +758,7 @@ void fire_redeemer(edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 void trail_rocket_think(edict_t *ent)
 {
 	
-	fire_grenade(ent, ent->s.origin, ent->movedir, 100, 200, 2.0, 50);
+	fire_grenade(ent, ent->s.origin, ent->movedir, 100, 0, 2.0, 50);
 
 	ent->nextthink = level.time + .5;
 }
@@ -839,6 +839,78 @@ void fire_wall_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int s
 	rocket->dmg_radius = damage_radius;
 	rocket->s.sound = gi.soundindex("weapons/rockfly.wav");
 	rocket->classname = "rocket";
+
+	if (self->client)
+		check_dodge(self, rocket->s.origin, dir, speed);
+
+	gi.linkentity(rocket);
+}
+
+void homing_rocket_think(edict_t *ent)
+{
+	vec3_t to_target;
+	vec_t speed;
+	if (ent->homing_target == NULL)
+	{
+		while ((ent->homing_target = findradius(ent->homing_target, ent->s.origin, 1000)) != NULL)
+		{
+				if (!ent->homing_target->client)
+					continue;
+				if (!ent->homing_target->takedamage)
+					continue;
+				if (ent->homing_target->health <= 0)
+					continue;
+				if (!visible(ent, ent->homing_target))
+					continue;
+				if (ent->homing_target == ent->owner)
+					continue;
+				break;
+		}
+		ent->nextthink = level.time + .1;
+		return;
+	}
+	else {
+		VectorSubtract(ent->homing_target->s.origin, ent->s.origin, to_target);
+		to_target[2] += 16;
+
+		VectorNormalize(to_target);
+		VectorScale(to_target, 0.3, to_target);
+		VectorAdd(to_target, ent->movedir, to_target);
+		VectorNormalize(to_target);
+		VectorCopy(to_target, ent->movedir);
+		vectoangles(to_target, ent->s.angles);
+		speed = VectorLength(ent->velocity);
+		VectorScale(to_target, speed, ent->velocity);
+		ent->nextthink = level.time + .1;
+	}
+}
+
+void fire_homing_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+{
+	edict_t	*rocket;
+
+	rocket = G_Spawn();
+	VectorCopy(start, rocket->s.origin);
+	VectorCopy(dir, rocket->movedir);
+	vectoangles(dir, rocket->s.angles);
+	VectorScale(dir, speed, rocket->velocity);
+	rocket->movetype = MOVETYPE_FLYMISSILE;
+	rocket->clipmask = MASK_SHOT;
+	rocket->solid = SOLID_BBOX;
+	rocket->s.effects |= EF_ROCKET;
+	VectorClear(rocket->mins);
+	VectorClear(rocket->maxs);
+	rocket->s.modelindex = gi.modelindex("models/objects/rocket/tris.md2");
+	rocket->owner = self;
+	rocket->touch = rocket_touch;
+	rocket->nextthink = level.time + 0.3;
+	rocket->think = homing_rocket_think;
+	rocket->dmg = damage;
+	rocket->radius_dmg = radius_damage;
+	rocket->dmg_radius = damage_radius;
+	rocket->s.sound = gi.soundindex("weapons/rockfly.wav");
+	rocket->classname = "rocket";
+	rocket->homing_target = NULL;
 
 	if (self->client)
 		check_dodge(self, rocket->s.origin, dir, speed);
