@@ -1095,7 +1095,9 @@ void Chaingun_Fire (edict_t *ent)
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 		fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
+		fire_homing_rocket(ent, start, up, damage, 300, 100,25);
 	}
+
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1107,6 +1109,7 @@ void Chaingun_Fire (edict_t *ent)
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index] -= shots;
+	Machinegun_Fire(ent);
 }
 
 
