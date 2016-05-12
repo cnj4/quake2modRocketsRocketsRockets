@@ -1345,9 +1345,9 @@ void weapon_bfg_fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 300 + (int)(random() * 20.0);
-	radius_damage = 120;
-	damage_radius = 400;
+	damage = 700 + (int)(random() * 600);
+	radius_damage = 600;
+	damage_radius = 500;
 	if (is_quad)
 	{
 		damage *= 4;
@@ -1373,8 +1373,8 @@ void weapon_bfg_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (/*!*/((int)dmflags->value & DF_INFINITE_AMMO))
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	if (!((int)dmflags->value & DF_INFINITE_AMMO))
+		ent->client->pers.inventory[ent->client->ammo_index]-=50;
 }
 
 

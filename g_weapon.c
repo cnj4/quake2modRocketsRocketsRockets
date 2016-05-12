@@ -704,12 +704,16 @@ void fire_mirv_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int s
 
 void redeemer_think(edict_t *ent)
 {
-	vec3_t targetdir;
+	vec3_t targetdir, lookdir,start, end;
 	vec_t speed;
+	trace_t laser;
 
-	
-	AngleVectors(ent->owner->client->v_angle, targetdir, NULL, NULL);
+	AngleVectors(ent->owner->client->v_angle, lookdir, NULL, NULL);
+	VectorMA(ent->owner->s.origin, 8192, lookdir, end);
+	VectorCopy(ent->owner->s.origin, start);
+	laser = gi.trace(start, NULL, NULL, end, ent, MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA);
 
+	VectorSubtract(laser.endpos, ent->s.origin, targetdir);
 	VectorNormalize(targetdir);
 	VectorScale(targetdir, 0.5, targetdir);
 	VectorAdd(targetdir, ent->movedir, targetdir);
